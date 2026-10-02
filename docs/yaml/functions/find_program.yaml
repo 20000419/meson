@@ -19,11 +19,18 @@ description: |
     subproject wrap files, if [`wrap_mode`](Builtin-options.md#core-options) is
     set to anything other than `nofallback`
 
-  *Since 1.13.0*, the machine-file, `dirs:`, source-tree and `PATH` stages
-  are applied to each name in argument order before trying the next name.
-  A machine-file entry prevents system lookup for that name. Overrides and
-  forced subproject fallbacks are checked before this per-name search; other
-  subproject fallbacks are checked after it.
+  Program overrides and forced subproject fallbacks are checked first.
+  *Since 1.13.0*, if neither provides a program, Meson tries the names in the
+  order given. For each name:
+
+  - If the name is defined in a machine file, Meson uses that entry. It does
+    not search for another program with the same name elsewhere.
+  - Otherwise, Meson searches the directories listed in `dirs:`, the
+    project's source tree and `PATH`, as described above.
+
+  If the program is not found or does not satisfy the requested version,
+  Meson tries the next name. Only after trying all names does it consider
+  the remaining subproject fallbacks.
 
   Meson will also autodetect scripts with a shebang line and run them
   with the executable/interpreter specified in it both on Windows
@@ -70,9 +77,7 @@ varargs:
     program may have many alternative names, such as `foo` and
     `foo.py`. The function will check for the arguments one by one and the
     first one that is found is returned. *Since 1.13.0*, programs that do not
-    satisfy the requested version can fall back to subsequent names. For each
-    name, a machine-file entry takes precedence over system lookup, even if
-    its version does not satisfy the requirement.
+    satisfy the requested version can fall back to subsequent names.
 
 kwargs:
   required:
